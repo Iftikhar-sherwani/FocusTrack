@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #E8E2D0;
+  --color-surface: #FFFFFF;
+  --color-surfaceAlt: #F2EEE2;
+  --color-border: #DDD8C8;
+  --color-accent: #EAB308;
+  --color-accentHover: #CA9A06;
+  --color-text: #1A1A1A;
+  --color-textMuted: #888880;
+  --color-progress: #EAB308;
+  --color-progressTrack: #E8E8DE;
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --ring-start: #EAB308;
+  --ring-end: #F59E0B;
+  --app-bg: #E8E2D0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--app-bg);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.theme-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+
+html[data-theme='formula1'] .theme-card {
+  border-left: 3px solid var(--color-accent);
+  border-radius: 0;
+}
+
+html[data-theme='football'] .theme-card {
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(76, 175, 80, 0.2);
+}
+
+html[data-theme='boxing'] .theme-card {
+  border-radius: 4px;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme='military'] .theme-card {
+  border-left: 4px solid var(--color-accent);
+  border-radius: 0;
+}
+
+html[data-theme='minimal'] .theme-card {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.hero-cta {
+  border: 1px solid transparent;
+}
+
+html[data-theme='football'] .hero-cta {
+  border-radius: 9999px;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  clip-path: none !important;
+}
+
+html[data-theme='boxing'] .hero-cta {
+  clip-path: none !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme='military'] .hero-cta {
+  clip-path: none !important;
+  text-transform: uppercase;
+  border-radius: 0;
+  border-color: var(--color-border);
+}
+
+html[data-theme='minimal'] .hero-cta {
+  clip-path: none !important;
+  background: transparent !important;
+  color: var(--color-accent) !important;
+  border-color: var(--color-accent);
+}
+
+html[data-theme='minimal'] .hero-cta:hover {
+  background: var(--color-accent) !important;
+  color: #fff !important;
+}
+
+html[data-theme='boxing'] body::before {
+  background: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 8px 8px;
+  opacity: 0.35;
+}
