@@ -28,15 +28,31 @@ export function TodoItem({ todo }: Props) {
     transition,
   }
 
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const missed = (() => {
+    if (todo.status === 'done') return false
+    if (!todo.daysOfWeek || todo.daysOfWeek.length === 0) return false
+
+    const now = new Date()
+    const today = now.getDay()
+    if (todo.endTime && todo.daysOfWeek.includes(today)) {
+      const [endHour, endMinute] = todo.endTime.split(':').map(Number)
+      const end = new Date()
+      end.setHours(endHour, endMinute, 0, 0)
+      if (now > end) return true
+    }
+    return false
+  })()
+
   return (
     <motion.div
       ref={setNodeRef}
-      style={{ ...style, borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
+      style={{ ...style, borderColor: missed ? 'var(--color-danger)' : 'var(--color-border)', background: missed ? 'rgba(239,68,68,0.1)' : 'var(--color-surface)' }}
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className="border p-3"
+      className={`border p-3 ${missed ? 'ring-1 ring-red-500' : ''}`}
       role="button"
       onClick={() => toggleStatus(todo.id)}
       onKeyDown={(event) => {
@@ -77,7 +93,9 @@ export function TodoItem({ todo }: Props) {
               </span>
               <span>{todo.status}</span>
               {todo.estimatedMinutes ? <span>{todo.estimatedMinutes}m</span> : null}
-              {todo.dueDate ? <span>Due {todo.dueDate}</span> : null}
+              {todo.startTime && todo.endTime ? <span>{todo.startTime} - {todo.endTime}</span> : null}
+              {todo.daysOfWeek && todo.daysOfWeek.length > 0 ? <span>{todo.daysOfWeek.map(d => DAYS[d]).join(', ')}</span> : null}
+              {missed ? <span style={{ color: 'var(--color-danger)' }} className="font-bold">Missed!</span> : null}
             </div>
           </div>
         </div>

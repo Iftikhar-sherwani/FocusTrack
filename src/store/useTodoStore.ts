@@ -11,6 +11,7 @@ type TodoStore = {
   reorderTodos: (newOrder: Todo[]) => void
   clearCompleted: () => void
   clearAllData: () => void
+  checkRecurringTodos: () => void
 }
 
 const nextStatus: Record<TodoStatus, TodoStatus> = {
@@ -44,11 +45,20 @@ export const useTodoStore = create<TodoStore>()(
           todos: state.todos.filter((todo) => todo.id !== id),
         })),
       toggleStatus: (id) =>
-        set((state) => ({
-          todos: state.todos.map((todo) =>
-            todo.id === id ? { ...todo, status: nextStatus[todo.status] } : todo,
-          ),
-        })),
+        set((state) => {
+          const todayStr = new Date().toISOString().split('T')[0]
+          return {
+            todos: state.todos.map((todo) => {
+              if (todo.id !== id) return todo
+              const newStatus = nextStatus[todo.status]
+              const updates: Partial<Todo> = { status: newStatus }
+              if (newStatus === 'done' && todo.daysOfWeek && todo.daysOfWeek.length > 0) {
+                updates.lastCompletedDate = todayStr
+              }
+              return { ...todo, ...updates }
+            }),
+          }
+        }),
       reorderTodos: (newOrder) =>
         set({
           todos: newOrder.map((todo, index) => ({ ...todo, order: index })),
@@ -58,6 +68,25 @@ export const useTodoStore = create<TodoStore>()(
           todos: get().todos.filter((todo) => todo.status !== 'done'),
         })),
       clearAllData: () => set({ todos: [] }),
+      checkRecurringTodos: () => {
+        set((state) => {
+          const todayStr = new Date().toISOString().split('T')[0]
+          const todayDay = new Date().getDay()
+          let changed = false
+          
+          const newTodos = state.todos.map((todo) => {
+            if (todo.status === 'done' && todo.daysOfWeek && todo.daysOfWeek.includes(todayDay)) {
+              if (todo.lastCompletedDate !== todayStr) {
+                changed = true
+                return { ...todo, status: 'pending' as TodoStatus }
+              }
+            }
+            return todo
+          })
+          
+          return changed ? { todos: newTodos } : state
+        })
+      },
     }),
     {
       name: 'focus-todo-store',

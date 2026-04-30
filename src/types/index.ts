@@ -26,7 +26,10 @@ export type Todo = {
   priority: 'high' | 'medium' | 'low'
   status: TodoStatus
   estimatedMinutes?: number
-  dueDate?: string
+  startTime?: string
+  endTime?: string
+  daysOfWeek?: number[]
+  lastCompletedDate?: string
   createdAt: number
   order: number
 }

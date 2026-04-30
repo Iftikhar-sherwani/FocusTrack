@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# FocusTrack
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+FocusTrack is a robust to-do application designed to enhance daily engagement and improve task accountability. Built with React, TypeScript, and Vite, it emphasizes building consistent habits through mandatory completions, scheduling features, and a daily accountability challenge.
 
-Currently, two official plugins are available:
+## Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+*   **Robust Task Scheduling:** Define specific start and end times for tasks. Assign tasks to single or multiple days of the week, allowing for flexible yet structured routines.
+*   **Mandatory Completion Workflow:** Once a task is marked as complete, it cannot be unchecked. This enforces accountability and provides a definitive sense of accomplishment. Incomplete items maintain visual prominence.
+*   **Daily Accountability Challenge:** A unique daily challenge system that tracks your progress against scheduled tasks. Complete all active tasks for the day to maintain and build your streak.
+*   **Streak Tracking:** Visually track your consecutive days of completing all scheduled tasks, motivating you to interact with the application daily.
+*   **Local Storage Persistence:** All tasks and your current streak are saved locally in your browser, ensuring no data is lost between sessions.
+*   **Modern UI:** A clean, responsive interface styled with Tailwind CSS, offering a smooth user experience.
 
-## React Compiler
+## Technologies Used
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+*   **Frontend:** React, TypeScript, Vite
+*   **Styling:** Tailwind CSS, `lucide-react` for icons
+*   **State Management:** Zustand
+*   **Utilities:** `date-fns` for robust date manipulation
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+*   Node.js (v16 or higher recommended)
+*   npm
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1.  Clone the repository:
+    ```bash
+    git clone <repository-url>
+    ```
+2.  Navigate to the project directory:
+    ```bash
+    cd FocusTrack
+    ```
+3.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+### Running Locally
+
+To start the development server, run:
+
+```bash
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The application will be available at `http://localhost:5173` (or the port specified by Vite).

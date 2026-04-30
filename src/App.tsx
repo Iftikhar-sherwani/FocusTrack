@@ -470,6 +470,16 @@ function App() {
     return () => document.removeEventListener('visibilitychange', handler)
   }, [token, syncReady, syncToServer])
 
+  // Check recurring todos periodically
+  useEffect(() => {
+    const checkTodos = () => {
+      useTodoStore.getState().checkRecurringTodos()
+    }
+    checkTodos() // check immediately
+    const id = setInterval(checkTodos, 60_000)
+    return () => clearInterval(id)
+  }, [])
+
   // Not authenticated → show auth page
   if (!token) {
     return (
