@@ -61,10 +61,11 @@ export const handler = async (event, context) => {
   } catch (error) {
     console.error('Error saving user:', error);
     if (error.message && error.message.includes('UNIQUE constraint failed')) {
+      // Act as a login instead of throwing an error
       return {
-        statusCode: 409,
+        statusCode: 200,
         headers,
-        body: JSON.stringify({ error: 'Email already registered' }),
+        body: JSON.stringify({ message: 'Welcome back!' }),
       };
     }
     return {
