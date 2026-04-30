@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, User, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '../../store/useAuthStore';
 
 type Props = {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export function SignupModal({ isOpen, onClose }: Props) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +33,7 @@ export function SignupModal({ isOpen, onClose }: Props) {
 
       if (res.ok) {
         setSuccess(true);
+        setAuth('local-token', { id: Date.now(), name: name.trim(), email: email.trim() });
         toast.success('Thanks for joining!');
         setTimeout(() => onClose(), 2000);
       } else {

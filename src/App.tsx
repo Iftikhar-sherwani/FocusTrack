@@ -19,11 +19,13 @@ import { TodoView } from './components/TodoList/TodoView'
 import { useTodoStore } from './store/useTodoStore'
 import { useUIStore } from './store/useUIStore'
 import { useWorkStore } from './store/useWorkStore'
+import { useAuthStore } from './store/useAuthStore'
 import { getAlertMessage, shouldTriggerWeeklyAlert } from './utils/alertEngine'
 import { formatHoursMinutes } from './utils/timeCalc'
 import { SignupModal } from './components/Auth/SignupModal'
 
 function DashboardView() {
+  const user = useAuthStore((state) => state.user)
   const clockIn = useWorkStore((state) => state.clockIn)
   const clockOut = useWorkStore((state) => state.clockOut)
   const getTodayLog = useWorkStore((state) => state.getTodayLog)
@@ -98,10 +100,10 @@ function DashboardView() {
       <div className="mb-7">
         <p className="text-sm mb-1 flex items-center gap-1.5" style={{ color: 'var(--color-textMuted)' }}>
           <CalendarDays size={13} />
-          {format(new Date(), 'EEEE, MMMM dd, yyyy')}
+          {format(new Date(), 'EEEE, MMMM do')}
         </p>
-        <h1 className="text-3xl font-bold mb-5" style={{ fontFamily: 'var(--font-heading)' }}>
-          Welcome back, Champion
+        <h1 className="text-3xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>
+          Welcome back, {user?.name || 'Champion'}
         </h1>
 
         {/* Stats bar */}

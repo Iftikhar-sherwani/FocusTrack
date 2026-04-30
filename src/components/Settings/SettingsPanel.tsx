@@ -35,7 +35,9 @@ export function SettingsPanel() {
         <button
           onClick={() => {
             logout()
+            localStorage.removeItem('hasSignedUp')
             toast.success('Signed out')
+            setTimeout(() => window.location.reload(), 500)
           }}
           className="px-4 py-2 border text-sm font-medium"
           style={{ borderColor: 'var(--color-border)', color: 'var(--color-danger)' }}
