@@ -3,8 +3,6 @@ import { endOfDay, format, isBefore, parseISO } from 'date-fns'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { CalendarDays, Flame, Play, Shield, Square } from 'lucide-react'
-import { fetchSync, pushSync } from './api/data'
-import { AuthPage } from './components/Auth/AuthPage'
 import { DeficitAlert } from './components/Alerts/DeficitAlert'
 import { HistoryView } from './components/History/HistoryView'
 import { Header } from './components/Layout/Header'
@@ -18,13 +16,13 @@ import { WeeklyBar } from './components/Progress/WeeklyBar'
 import { SettingsPanel } from './components/Settings/SettingsPanel'
 import { TodoPanel } from './components/TodoList/TodoPanel'
 import { TodoView } from './components/TodoList/TodoView'
-import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
 import { useTodoStore } from './store/useTodoStore'
 import { useUIStore } from './store/useUIStore'
 import { useWorkStore } from './store/useWorkStore'
 import { getAlertMessage, shouldTriggerWeeklyAlert } from './utils/alertEngine'
 import { formatHoursMinutes } from './utils/timeCalc'
+import { SignupModal } from './components/Auth/SignupModal'
 
 function DashboardView() {
   const clockIn = useWorkStore((state) => state.clockIn)
@@ -36,7 +34,6 @@ function DashboardView() {
   const weeklyDeficitThreshold = useWorkStore((state) => state.weeklyDeficitThreshold)
   const activeSessions = useWorkStore((state) => state.activeSessions)
   const todos = useTodoStore((state) => state.todos)
-  const user = useAuthStore((state) => state.user)
 
   const [now, setNow] = useState(Date.now())
   const [dismissedAt, setDismissedAt] = useState<number | null>(null)
@@ -105,7 +102,7 @@ function DashboardView() {
           {format(new Date(), 'EEEE, MMMM dd, yyyy')}
         </p>
         <h1 className="text-3xl font-bold mb-5" style={{ fontFamily: 'var(--font-heading)' }}>
-          Welcome back, {user?.name ?? 'Champion'}
+          Welcome back, Champion
         </h1>
 
         {/* Stats bar */}
@@ -384,91 +381,13 @@ function App() {
   const activeView = useUIStore((state) => state.activeView)
   const todos = useTodoStore((state) => state.todos)
   const dayLogs = useWorkStore((state) => state.dayLogs)
-  const token = useAuthStore((state) => state.token)
   const [onboardingDone, setOnboardingDone] = useState(false)
-  const [syncing, setSyncing] = useState(false)
-  const [syncReady, setSyncReady] = useState(false)
+  const [showSignup, setShowSignup] = useState(() => !localStorage.getItem('hasSignedUp'))
 
-  // Build the current payload to push to the server
-  const buildSyncPayload = useCallback(() => {
-    const work = useWorkStore.getState()
-    const todoState = useTodoStore.getState()
-    const theme = useThemeStore.getState()
-    return {
-      workLogs: work.dayLogs,
-      todos: todoState.todos,
-      settings: {
-        dailyGoal: work.dailyGoal,
-        weeklyAlertEnabled: work.weeklyAlertEnabled,
-        weeklyDeficitThreshold: work.weeklyDeficitThreshold,
-        workDays: work.workDays,
-        themeId: theme.activeTheme.id,
-      },
-    }
-  }, [])
-
-  // Push all current data to server (fire-and-forget, silent on failure)
-  const syncToServer = useCallback(async () => {
-    if (!token) return
-    await pushSync(token, buildSyncPayload()).catch(() => {})
-  }, [token, buildSyncPayload])
-
-  // On mount / token change: pull data from server and hydrate stores
-  useEffect(() => {
-    if (!token) {
-      setSyncReady(false)
-      return
-    }
-    setSyncing(true)
-    fetchSync(token)
-      .then((data) => {
-        if (data.workLogs.length > 0) {
-          useWorkStore.setState({ dayLogs: data.workLogs })
-        }
-        if (data.todos.length > 0) {
-          useTodoStore.setState({ todos: data.todos })
-        }
-        if (data.settings) {
-          const s = data.settings as Record<string, unknown>
-          useWorkStore.setState({
-            dailyGoal: typeof s.dailyGoal === 'number' ? s.dailyGoal : 6,
-            weeklyAlertEnabled: typeof s.weeklyAlertEnabled === 'boolean' ? s.weeklyAlertEnabled : true,
-            weeklyDeficitThreshold: typeof s.weeklyDeficitThreshold === 'number' ? s.weeklyDeficitThreshold : 2,
-            workDays: Array.isArray(s.workDays) ? s.workDays : [1, 2, 3, 4, 5, 6, 0],
-          })
-          if (typeof s.themeId === 'string') {
-            useThemeStore.getState().setTheme(s.themeId)
-          }
-        } else if (data.workLogs.length === 0 && data.todos.length === 0) {
-          // New user with no server data — push whatever local data exists
-          pushSync(token, buildSyncPayload()).catch(() => {})
-        }
-      })
-      .catch(() => {
-        // Server unreachable — continue with local data
-      })
-      .finally(() => {
-        setSyncing(false)
-        setSyncReady(true)
-      })
-  }, [token, buildSyncPayload])
-
-  // Periodic sync every 60 s
-  useEffect(() => {
-    if (!token || !syncReady) return
-    const id = setInterval(syncToServer, 60_000)
-    return () => clearInterval(id)
-  }, [token, syncReady, syncToServer])
-
-  // Sync when tab becomes hidden (covers tab close, navigation)
-  useEffect(() => {
-    if (!token || !syncReady) return
-    const handler = () => {
-      if (document.visibilityState === 'hidden') syncToServer()
-    }
-    document.addEventListener('visibilitychange', handler)
-    return () => document.removeEventListener('visibilitychange', handler)
-  }, [token, syncReady, syncToServer])
+  const handleSignupClose = () => {
+    localStorage.setItem('hasSignedUp', 'true')
+    setShowSignup(false)
+  }
 
   // Check recurring todos periodically
   useEffect(() => {
@@ -480,37 +399,12 @@ function App() {
     return () => clearInterval(id)
   }, [])
 
-  // Not authenticated → show auth page
-  if (!token) {
-    return (
-      <ThemeWrapper>
-        <Toaster position="top-right" />
-        <AuthPage onSuccess={() => {}} />
-      </ThemeWrapper>
-    )
-  }
-
-  // Waiting for initial server sync
-  if (syncing) {
-    return (
-      <ThemeWrapper>
-        <div
-          className="min-h-screen flex items-center justify-center"
-          style={{ background: 'var(--app-bg)' }}
-        >
-          <p className="text-sm animate-pulse" style={{ color: 'var(--color-textMuted)' }}>
-            Loading your data…
-          </p>
-        </div>
-      </ThemeWrapper>
-    )
-  }
-
   const shouldShowOnboarding = !onboardingDone && dayLogs.length === 0 && todos.length === 0
 
   if (shouldShowOnboarding) {
     return (
       <ThemeWrapper>
+        <SignupModal isOpen={showSignup} onClose={handleSignupClose} />
         <Onboarding onDone={() => setOnboardingDone(true)} />
       </ThemeWrapper>
     )
@@ -519,6 +413,8 @@ function App() {
   return (
     <ThemeWrapper>
       <Toaster position="top-right" />
+      <SignupModal isOpen={showSignup} onClose={handleSignupClose} />
+      
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--app-bg)' }}>
         <Sidebar />
         <main className="flex-1 p-4 pb-24 md:p-8 lg:p-10">
