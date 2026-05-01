@@ -19,7 +19,7 @@ type WorkStore = {
   weeklyDeficitThreshold: number
   workDays: number[]
   clockIn: () => void
-  clockOut: () => void
+  clockOut: (forcedEndTime?: number) => void
   closeDay: () => void
   setDailyGoal: (goal: number) => void
   setWeeklyAlertEnabled: (enabled: boolean) => void
@@ -84,15 +84,15 @@ export const useWorkStore = create<WorkStore>()(
           }
         }),
 
-      clockOut: () =>
+      clockOut: (forcedEndTime?: number) =>
         set((state) => {
           const active = state.activeSessions.find((session) => session.endTime === null)
           if (!active) {
             return state
           }
 
-          const endTime = Date.now()
-          const duration = calculateSessionMinutes(active.startTime, endTime)
+          const endTime = forcedEndTime || Date.now()
+          const duration = Math.max(0, calculateSessionMinutes(active.startTime, endTime))
 
           const completedSession: WorkSession = {
             ...active,

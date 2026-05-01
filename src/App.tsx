@@ -400,6 +400,59 @@ function App() {
     return () => clearInterval(id)
   }, [])
 
+  // Auto-pause and idle detection
+  useEffect(() => {
+    // 1. Auto-clock out on tab close / reload
+    const handleBeforeUnload = () => {
+      const activeSessions = useWorkStore.getState().activeSessions
+      if (activeSessions.length > 0) {
+        useWorkStore.getState().clockOut()
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    // 2. Idle detection
+    let lastActivity = Date.now()
+    const IDLE_LIMIT = 45 * 60 * 1000 // 45 minutes
+
+    const resetIdle = () => {
+      lastActivity = Date.now()
+    }
+
+    // Attach interaction listeners
+    window.addEventListener('mousemove', resetIdle)
+    window.addEventListener('keydown', resetIdle)
+    window.addEventListener('click', resetIdle)
+    window.addEventListener('scroll', resetIdle)
+
+    // Check for idle or excessively long sessions
+    const checkIdle = setInterval(() => {
+      const activeSessions = useWorkStore.getState().activeSessions
+      if (activeSessions.length > 0) {
+        const session = activeSessions[0]
+        
+        // If computer slept and woke up, or user walked away
+        if (Date.now() - lastActivity > IDLE_LIMIT) {
+          useWorkStore.getState().clockOut(lastActivity)
+          toast('Session paused due to inactivity.', { icon: '💤', duration: 8000 })
+        } else if (Date.now() - session.startTime > 12 * 60 * 60 * 1000) {
+          // Hard cap at 12 hours max per session to avoid run-on errors
+          useWorkStore.getState().clockOut(session.startTime + 12 * 60 * 60 * 1000)
+          toast('Session automatically ended after 12 hours.', { icon: '⏰', duration: 8000 })
+        }
+      }
+    }, 10000) // check every 10 seconds
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('mousemove', resetIdle)
+      window.removeEventListener('keydown', resetIdle)
+      window.removeEventListener('click', resetIdle)
+      window.removeEventListener('scroll', resetIdle)
+      clearInterval(checkIdle)
+    }
+  }, [])
+
   const shouldShowOnboarding = !onboardingDone && dayLogs.length === 0 && todos.length === 0
 
   if (shouldShowOnboarding) {

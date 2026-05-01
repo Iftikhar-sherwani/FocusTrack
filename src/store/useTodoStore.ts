@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { format } from 'date-fns'
 import type { Todo, TodoStatus } from '../types'
 
 type TodoStore = {
@@ -46,7 +47,7 @@ export const useTodoStore = create<TodoStore>()(
         })),
       toggleStatus: (id) =>
         set((state) => {
-          const todayStr = new Date().toISOString().split('T')[0]
+          const todayStr = format(new Date(), 'yyyy-MM-dd')
           return {
             todos: state.todos.map((todo) => {
               if (todo.id !== id) return todo
@@ -70,7 +71,7 @@ export const useTodoStore = create<TodoStore>()(
       clearAllData: () => set({ todos: [] }),
       checkRecurringTodos: () => {
         set((state) => {
-          const todayStr = new Date().toISOString().split('T')[0]
+          const todayStr = format(new Date(), 'yyyy-MM-dd')
           const todayDay = new Date().getDay()
           let changed = false
           

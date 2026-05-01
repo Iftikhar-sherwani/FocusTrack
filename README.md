@@ -10,6 +10,9 @@ FocusTrack is a robust to-do application designed to enhance daily engagement an
 *   **Streak Tracking:** Visually track your consecutive days of completing all scheduled tasks, motivating you to interact with the application daily.
 *   **Local Storage Persistence:** All tasks and your current streak are saved locally in your browser, ensuring no data is lost between sessions.
 *   **Modern UI:** A clean, responsive interface styled with Tailwind CSS, offering a smooth user experience.
+## Future Roadmap
+
+*   **Google Calendar Integration (Level 2):** Allow users to connect their Google Calendar. Calendar events will automatically be imported as interactive tasks into the daily To-Do list, enabling users to mark meetings and schedules as "completed" alongside their manual tasks.
 
 ## Technologies Used
 
