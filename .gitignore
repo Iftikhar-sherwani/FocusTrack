@@ -32,3 +32,4 @@ server/*.db-wal
 .env
 .env.local
 .env.*.local
+Turso Credentials.txt
